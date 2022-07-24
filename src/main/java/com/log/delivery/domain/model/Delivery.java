@@ -17,6 +17,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import com.log.delivery.domain.exception.DomainExceptionHandler;
+
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -50,5 +52,24 @@ public class Delivery {
 	private OffsetDateTime orderDate;
 	
 	private OffsetDateTime finishedDate;
+
+	public Occurrence addOccurrence(String description) {
+		Occurrence occurrence = new Occurrence();
+		occurrence.setDescription(description);
+		occurrence.setRegisterDate(OffsetDateTime.now());
+		occurrence.setDelivery(this);
+		
+		this.getOccurrences().add(occurrence);
+		
+		return occurrence;
+	}
 	
+	public void finish() {
+		if (OrderStatus.PENDING.equals(getStatus())) {
+			throw new DomainExceptionHandler("Delivery cannot be finished");
+		}
+
+		setStatus(OrderStatus.FINISHED);
+		setFinishedDate(OffsetDateTime.now());
+	}
 }
